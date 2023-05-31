@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservizi-prenotazione
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microservizi-prenotazione
+  template:
+    metadata:
+      labels:
+        app: microservizi-prenotazione
+    spec:
+      containers:
+        - name: microservizi-prenotazione
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-pren:5432/dbRicerca
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: password
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+            - name: API-GATEWAY-HOST
+              value: api-gateway.default.svc.cluster.local:8080
+            - name: RABBITMQ_HOST
+              value: rabbitmq.default.svc.cluster.local
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USERNAME
+              value: guest
+            - name: RABBITMQ_PASSWORD
+              value: guest
+          image: pievit/microservizi-prenotazione:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservizi-prenotazione
+spec:
+  selector:
+    app: microservizi-prenotazione
+  ports:
+    - port: 8080
+      targetPort: 8080
